@@ -71,3 +71,6 @@ config/*.yml
 # Misc
 .playwright-mcp/
 cypress/screenshots/
+
+# Raw scanner output (only redacted reports and summaries are committed)
+reports/raw/

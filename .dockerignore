@@ -31,3 +31,4 @@ scripts/
 terraform/
 test/
 vagrant/
+reports/
