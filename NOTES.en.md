@@ -12,6 +12,7 @@ My learning notes from building a DevSecOps pipeline on top of OWASP Juice Shop.
 
 ## Setup
 
+- This repo is a frozen snapshot of Juice Shop at commit 717f5efa8 (v20.3.0+7). All findings are tied to that version of the code.
 - Access to the Docker socket is the same as root access. The daemon runs as root, so anyone who can use the socket can mount / into a container.
 - A multi-stage build only drops what sits outside the app folder. Files like .env still end up in the image unless .dockerignore excludes them.
 - Ports should be bound to 127.0.0.1. I tested it: with -p 3000:3000, another laptop on the same Wi-Fi could open my app, and UFW did not stop it because Docker redirects the packet before it ever reaches UFW.

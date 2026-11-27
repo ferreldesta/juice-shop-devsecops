@@ -12,6 +12,7 @@ Catatan belajarku selama membangun pipeline DevSecOps di atas OWASP Juice Shop. 
 
 ## Setup
 
+- Repo ini snapshot beku dari Juice Shop di commit 717f5efa8 (v20.3.0+7). Semua temuan terikat ke versi kode itu.
 - Akses ke socket Docker sama dengan akses root. Daemon jalan sebagai root, jadi siapa pun yang bisa pakai socket bisa mount / ke container.
 - Multi-stage build cuma membuang yang ada di luar folder app. File seperti .env tetap ikut ke image kalau tidak masuk .dockerignore.
 - Port harus diikat ke 127.0.0.1. Aku sudah coba sendiri: dengan -p 3000:3000, laptop lain di Wi-Fi yang sama bisa membuka app-ku, dan UFW tidak menahannya karena Docker membelokkan paket sebelum sampai ke UFW.

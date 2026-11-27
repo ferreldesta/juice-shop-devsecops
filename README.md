@@ -6,6 +6,8 @@ I run each scanner by hand and triage its output before adding it to CI. For eve
 
 > This repository is a copy of OWASP Juice Shop with my security work on top. The application code and its commit history belong to the upstream project; my part is the pipeline, the notes and the reports listed below. The original documentation is in the [upstream README](https://github.com/juice-shop/juice-shop#readme).
 >
+> Based on a frozen snapshot of OWASP Juice Shop at commit `717f5efa8` (v20.3.0+7).
+>
 > Juice Shop is intentionally insecure. Do not deploy it on a reachable network.
 
 ## Status

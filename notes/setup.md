@@ -1,5 +1,8 @@
 # Fase 0: Setup
 
+## Basis snapshot
+Repo ini snapshot beku dari juice-shop upstream di commit 717f5efa8 (2026-10-23, v20.3.0 plus 7 commit, sebelum v20.4.0). Semua temuan gitleaks, Semgrep, Trivy, dan ZAP di notes ini terikat ke versi kode itu.
+
 ## Isi repo
 
 | File/folder | Isi |
