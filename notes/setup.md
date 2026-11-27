@@ -63,3 +63,39 @@ Bare repo hanya berisi isi .git/ (riwayat dan data), tanpa working tree. Non-bar
 - Tidak ada duplikasi file.
 - Tidak akan teredit tanpa sengaja.
 - Bare repo tujuan push yang wajar. Push ke branch yang sedang di-checkout di repo non-bare ditolak secara default (receive.denyCurrentBranch). GitHub juga menyimpan repo dalam bentuk bare.
+
+## Bedah codeql-analysis.yml (sebelum workflow upstream dihapus)
+
+### Trigger
+on: push dan pull_request tanpa filter branch. Jalan di push ke branch mana pun dan di setiap PR. PR dari branch di repo yang sama memicu dua run sekaligus (push dan pull_request), jadi menit runner terbuang. Biasanya push dibatasi ke master saja, PR menangani branch lain.
+
+### Job dan step
+Satu job (analyze), empat step:
+- Checkout: runner itu VM kosong. Step ini meng-clone kode ke VM supaya ada yang bisa di-scan.
+- Initialize CodeQL: download CodeQL CLI dan siapkan pembuatan database.
+- Autobuild: CodeQL mengubah kode jadi database. Bahasa compiled (Java, C++) perlu di-compile supaya CodeQL bisa menonton build-nya. JS/TS tidak perlu compile, jadi di sini hampir tidak melakukan apa-apa.
+- Perform CodeQL Analysis: jalankan query ke database (mirip SQL), hasilkan SARIF, upload ke tab Security.
+
+Beda dengan Semgrep: Semgrep mencocokkan pola di AST tanpa database. CodeQL melacak dataflow lintas fungsi dan lintas file.
+
+### Matrix dan fail-fast
+Matrix menjalankan job yang sama beberapa kali dengan nilai variabel berbeda, paralel. Contoh language: [js, python] jadi 2 job. Di sini nilainya cuma satu, jadi sisa template. fail-fast default true: satu job matrix gagal, sisanya dibatalkan. false berarti semua tetap jalan. Untuk scanner ini penting, satu yang gagal tidak boleh menghilangkan hasil yang lain.
+
+### Permissions
+GITHUB_TOKEN tidak pernah punya akses tanpa batas. Scope-nya hanya repo itu dan expire saat job selesai. Tanpa blok permissions, token pakai default di Settings repo (read and write, atau read contents saja).
+
+Begitu blok permissions berisi satu permission apa pun, permission lain yang tidak ditulis jadi none, termasuk contents. Repo private: checkout gagal. Repo public: checkout mungkin masih jalan karena kodenya memang terbuka, tapi jangan diandalkan. Tulis contents: read secara eksplisit.
+
+Di workflow ini security-events: write hanya dibutuhkan untuk upload SARIF. Itu least privilege.
+
+### Pin SHA vs tag
+actions/checkout di-pin ke SHA, codeql-action cuma @v3. SHA menunjuk satu commit spesifik di repo action, dan commit itu immutable. Komentar #v7.0.1 di sampingnya hanya label untuk manusia dan Dependabot, tidak diverifikasi GitHub.
+
+Tag itu mutable. Pemilik action bisa memindahkan v3 ke commit lain, dan pemiliknya tidak harus jahat: akun atau token maintainer yang dibobol sudah cukup. Run berikutnya otomatis menarik kode baru tanpa diff yang bisa kulihat. Contoh nyata: tj-actions/changed-files, Maret 2025 (CVE-2025-30066), tag-nya dipindah ke commit yang men-dump secrets ke log. Solusinya pin ke SHA.
+
+### Ignore path vs ignore rule
+- paths-ignore data/static/codefixes itu ignore path, sama dengan keputusan .semgrepignore-ku. Risikonya blind spot atau cakupan ignore terlalu luas, dan orang dalam bisa menyembunyikan kode di path itu (penahannya CODEOWNERS).
+- exclude js/missing-rate-limiting itu ignore rule, berlaku di seluruh codebase. Satu kelas bug hilang dari laporan di semua file, termasuk file yang baru ditulis besok. Contohnya login tanpa rate limit (brute force) tidak pernah dilaporkan.
+
+### Setelah CodeQL dihapus
+SAST otomatis dari CodeQL hilang. Penggantinya Semgrep di workflow-ku sendiri. Catatan: CodeQL punya taint lintas file yang lebih dalam daripada Semgrep OSS, dan di Fase 1 Semgrep buta terhadap bug NoSQL. Opsional nanti: tambah CodeQL lagi sebagai workflow buatanku (di-pin SHA), lalu bandingkan hasilnya dengan Semgrep di Fase 3.
